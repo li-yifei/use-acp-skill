@@ -29,7 +29,7 @@ If you installed globally, you may need to point `serverCommand` to the binary p
 ## Install (GitHub)
 
 ```bash
-git clone https://github.com/<YOUR_GH_USERNAME>/use-acp-skill.git
+git clone https://github.com/li-yifei/use-acp-skill.git
 cd use-acp-skill
 npm i
 ```
