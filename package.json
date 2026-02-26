@@ -1,0 +1,35 @@
+{
+  "name": "use-acp-skill",
+  "version": "0.1.0",
+  "description": "ACP client for delegating code tasks to locally installed Claude Code",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    }
+  },
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@agentclientprotocol/sdk": "^0.14.1"
+  },
+  "peerDependencies": {
+    "@zed-industries/claude-code-acp": "^0.16.0"
+  },
+  "peerDependenciesMeta": {
+    "@zed-industries/claude-code-acp": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "vitest": "^4.0.0",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}
