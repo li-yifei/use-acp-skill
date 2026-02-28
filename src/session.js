@@ -1,4 +1,22 @@
 import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+
+/**
+ * Resolve a requested path and verify it falls under the given cwd.
+ * Returns the resolved path if valid, or an error string if outside cwd.
+ */
+export function validatePath(requestedPath, cwd, allowOutsideCwd) {
+    if (allowOutsideCwd) {
+        return { valid: true, resolved: path.resolve(requestedPath) };
+    }
+    const resolved = path.resolve(requestedPath);
+    const normalizedCwd = path.resolve(cwd);
+    if (!resolved.startsWith(normalizedCwd + path.sep) && resolved !== normalizedCwd) {
+        return { valid: false, error: `Path "${requestedPath}" is outside the allowed working directory` };
+    }
+    return { valid: true, resolved };
+}
+
 /**
  * Default permission handler - auto-allows everything.
  */
@@ -13,8 +31,12 @@ export class AcpSessionClient {
     events = [];
     eventListeners = [];
     permissionHandler;
-    constructor(permissionHandler) {
+    cwd;
+    allowOutsideCwd;
+    constructor(permissionHandler, cwd, allowOutsideCwd) {
         this.permissionHandler = permissionHandler ?? autoAllowPermission;
+        this.cwd = cwd ?? process.cwd();
+        this.allowOutsideCwd = allowOutsideCwd ?? false;
     }
     /**
      * Subscribe to streaming events.
@@ -105,8 +127,12 @@ export class AcpSessionClient {
         }
     }
     async readTextFile(params) {
+        const check = validatePath(params.path, this.cwd, this.allowOutsideCwd);
+        if (!check.valid) {
+            return { content: check.error };
+        }
         try {
-            const content = await fs.readFile(params.path, 'utf-8');
+            const content = await fs.readFile(check.resolved, 'utf-8');
             return { content };
         }
         catch {
@@ -114,7 +140,11 @@ export class AcpSessionClient {
         }
     }
     async writeTextFile(params) {
-        await fs.writeFile(params.path, params.content, 'utf-8');
+        const check = validatePath(params.path, this.cwd, this.allowOutsideCwd);
+        if (!check.valid) {
+            return { error: check.error };
+        }
+        await fs.writeFile(check.resolved, params.content, 'utf-8');
         return {};
     }
 }

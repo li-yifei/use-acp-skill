@@ -18,6 +18,7 @@
  * @property {string[]=} additionalDirectories
  * @property {McpServerConfig[]=} mcpServers
  * @property {(request:{title:string, options:Array<{name:string, kind:string, optionId:string}>})=>Promise<string|null>=} permissionHandler
+ * @property {boolean=} allowOutsideCwd - When true, readTextFile/writeTextFile can access paths outside cwd. Default false.
  */
 
 /**

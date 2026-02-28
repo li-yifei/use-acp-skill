@@ -1,5 +1,8 @@
 ---
 name: use-acp-skill
+version: "0.1.0"
+tags: ["acp", "claude-code", "agent", "delegation"]
+category: "integration"
 description: >
   Delegate complex code tasks to a locally installed Claude Code instance via ACP.
   Use when: (1) spawning a Claude agent subprocess to handle code tasks,
@@ -73,6 +76,17 @@ if (result.verified) {
 }
 await client.close();
 ```
+
+## SECURITY
+
+**`permissionMode` controls what the spawned Claude Code agent can do without asking.**
+
+- **`bypassPermissions`** skips all confirmation prompts. The agent can read, write, and execute arbitrary commands in the project directory. Only use in sandboxed or fully trusted environments.
+- **`acceptEdits`** auto-allows file writes but still prompts for shell commands. Safer than bypass, but the agent can still overwrite any file in `cwd`.
+- **`dontAsk`** denies all permission requests silently — the agent cannot perform any tool actions that require approval.
+- **`allowOutsideCwd: true`** lets `readTextFile`/`writeTextFile` access paths outside the working directory. This disables the path traversal guard entirely. Never enable this when `cwd` contains untrusted input.
+- Always scope `cwd` to the narrowest directory needed. The agent has full access to everything under `cwd`.
+- Treat the spawned agent as an untrusted subprocess: validate its outputs before using them in security-sensitive contexts.
 
 ## References
 

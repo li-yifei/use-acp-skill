@@ -76,7 +76,7 @@ LLM agents can "hallucinate" file writes — claiming a file was saved when no W
 3. Automatically retrying if files are missing
 
 ```typescript
-import { createClient, verifiedPrompt } from '/home/openclaw/.openclaw/workspace/skills/use-acp-skill/src/index.js';
+import { createClient, verifiedPrompt } from './src/index.js';
 
 const client = await createClient({ cwd: '/path/to/project', permissionMode: 'bypassPermissions' });
 

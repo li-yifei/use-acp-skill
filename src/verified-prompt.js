@@ -29,7 +29,7 @@ If ANY file is MISSING or has 0 bytes, you MUST retry writing it now. Do NOT rep
 /**
  * Strip markdown formatting (backticks, bold, italic) from text for reliable parsing.
  */
-function stripMarkdown(text) {
+export function stripMarkdown(text) {
     return text
         .replace(/```[^`]*```/gs, '') // code blocks
         .replace(/`([^`]+)`/g, '$1') // inline code
@@ -39,18 +39,20 @@ function stripMarkdown(text) {
 /**
  * Parse verification response to extract which files exist.
  */
-function parseVerification(text, expectedFiles) {
+export function parseVerification(text, expectedFiles) {
     const verified = [];
     const missing = [];
     const clean = stripMarkdown(text);
+    const lines = clean.split('\n');
     for (const file of expectedFiles) {
         const basename = file.split('/').pop() ?? file;
         const escaped = escapeRegex(file);
         const escapedBase = escapeRegex(basename);
-        // Check for negative indicators first
-        const hasMissing = /MISSING/i.test(clean) && (clean.includes(file) || clean.includes(basename));
-        const hasNoSuch = /No such file/i.test(clean) && clean.includes(basename);
-        const hasNotFound = /not found/i.test(clean) && clean.includes(basename);
+        // Check for negative indicators on lines that reference this file
+        const fileLines = lines.filter(l => l.includes(file) || l.includes(basename));
+        const hasMissing = fileLines.some(l => /MISSING/i.test(l));
+        const hasNoSuch = fileLines.some(l => /No such file/i.test(l));
+        const hasNotFound = fileLines.some(l => /not found/i.test(l));
         // Check for positive indicators
         const hasExist = new RegExp(`EXISTS[:\\s]+${escaped}`, 'i').test(clean)
             || new RegExp(`EXISTS[:\\s]+${escapedBase}`, 'i').test(clean);
@@ -72,7 +74,7 @@ function parseVerification(text, expectedFiles) {
     }
     return { verified, missing };
 }
-function escapeRegex(s) {
+export function escapeRegex(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 /**

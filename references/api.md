@@ -51,6 +51,7 @@ Creates and connects a client. Returns `AcpCodeClient`.
 | `acceptEdits` | Auto-allow file edits, ask for others |
 | `bypassPermissions` | Auto-allow everything (use with caution) |
 | `plan` | Read-only mode, no edits allowed |
+| `dontAsk` | Deny all permission requests without prompting. The agent cannot execute any tools that require approval. Use for dry-run or audit scenarios where no side effects are desired. *(Behavior inferred from name — verify against claude-code-acp release notes.)* |
 
 ## Streaming Events
 

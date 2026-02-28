@@ -29,7 +29,7 @@ export class AcpCodeClient {
                 return userHandler({ title, options });
             };
         }
-        this.sessionClient = new AcpSessionClient(sessionPermHandler);
+        this.sessionClient = new AcpSessionClient(sessionPermHandler, this.options.cwd, options.allowOutsideCwd);
     }
     /**
      * Start the ACP server and initialize the connection.
