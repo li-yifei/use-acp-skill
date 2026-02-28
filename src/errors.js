@@ -8,12 +8,15 @@ export class AcpSkillError extends Error {
     }
 }
 /**
- * Thrown when the claude-code-acp binary cannot be found.
+ * Thrown when the ACP server binary cannot be found.
  */
 export class ServerNotFoundError extends AcpSkillError {
     constructor(command) {
-        super(`Could not find '${command}'. ` +
-            `Install it with: npm install -g @zed-industries/claude-code-acp`);
+        super(
+          `Could not find '${command}' on PATH. ` +
+          `Install the agent/CLI you chose (see references/acp-agents-registry.md), ` +
+          `or set serverCommand/serverArgs to a valid ACP server.`
+        );
         this.name = 'ServerNotFoundError';
     }
 }

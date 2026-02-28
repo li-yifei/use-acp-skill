@@ -6,20 +6,23 @@ export class AcpServer {
     process = null;
     _stream = null;
     command;
+    args;
     env;
     permissionMode;
     constructor(options = {}) {
-        this.command = options.command ?? 'claude-code-acp';
+        this.command = options.command ?? 'claude-agent-acp';
+        this.args = options.args ?? [];
         this.env = options.env ?? {};
         this.permissionMode = options.permissionMode;
     }
     /**
-     * Spawn the claude-code-acp process and create the ACP stream.
+     * Spawn the ACP server process (stdio NDJSON) and create the ACP stream.
      * Returns the ndJsonStream for use with ClientSideConnection.
      */
     async start() {
-        // Build args array with permission mode if provided
-        const args = [];
+        // Build args array
+        const args = [...this.args];
+        // Optional: Zed's Claude adapter supports --permission-mode
         if (this.permissionMode) {
             args.push('--permission-mode', this.permissionMode);
         }

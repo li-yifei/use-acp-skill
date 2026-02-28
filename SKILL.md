@@ -1,35 +1,39 @@
 ---
 name: use-acp-skill
-version: "0.1.0"
-tags: ["acp", "claude-code", "agent", "delegation"]
-category: "integration"
 description: >
-  Delegate complex code tasks to a locally installed Claude Code instance via ACP.
-  Use when: (1) spawning a Claude agent subprocess to handle code tasks,
-  (2) streaming tool calls and results in real-time,
-  (3) controlling what tools the agent can use (permission modes).
-  NOT for: simple file reads, single-command tasks, or non-code queries.
-metadata:
-  openclaw:
-    emoji: "\U0001F50C"
+  Delegate code tasks to any ACP-compatible coding agent/CLI (Claude Agent, Codex CLI, Gemini CLI, etc.) by spawning an ACP server subprocess (stdio NDJSON) and communicating via Agent Client Protocol (ACP).
+  Use when you need to: (1) ask the human which ACP agent to use, (2) optionally remember a default agent choice, (3) stream tool events/results, or (4) run multi-step coding work through an external agent.
+  NOT for simple one-liner shell commands or quick file reads.
 ---
 
 # use-acp-skill
 
-Delegate complex code tasks to a local Claude Code instance. Send a prompt, get back results — Claude Code handles file reading, writing, and command execution.
+Delegate complex code tasks to an **ACP-compatible** agent by spawning its ACP server and speaking ACP over stdio.
+
+## Agent selection (ask the human)
+
+1. Read `references/acp-agents-registry.md`.
+2. Ask the human which agent/CLI to use (give 5–10 options).
+3. Ask whether to remember a default choice.
+   - If yes: store it in the project's memory (so future runs can default without asking).
+   - If no: require explicit choice each time.
 
 ## Prerequisites
 
-- `claude-code-acp` installed: `npm install -g @zed-industries/claude-code-acp`
-- Claude CLI authenticated: `claude login`
 - Node.js >= 20
+- Install at least one ACP-compatible agent/CLI (see `references/acp-agents-registry.md`).
 
 ## Simple Usage
 
 ```typescript
 import { createClient } from './src/index.js';
 
-const client = await createClient({ cwd: '/path/to/project' });
+const client = await createClient({
+  cwd: '/path/to/project',
+  // Pick an ACP server command for the agent you chose.
+  // Example: 'claude-agent-acp' or 'codex-acp'
+  serverCommand: 'claude-agent-acp',
+});
 const result = await client.prompt('Fix the TypeScript errors in src/app.ts');
 console.log(result.text);
 await client.close();
@@ -43,7 +47,14 @@ import { createClient } from './src/index.js';
 const client = await createClient({
   cwd: '/path/to/project',
   // If you installed the ACP server globally, it should be on PATH:
-  // serverCommand: 'claude-code-acp',
+  // serverCommand: 'claude-agent-acp',
+  //
+  // NOTE: Some agents need extra args (flags/subcommands) to enter ACP mode.
+  // Use `serverArgs` for that, e.g.
+  // - Gemini CLI: serverCommand: 'gemini', serverArgs: ['--experimental-acp']
+  // - OpenCode:   serverCommand: 'opencode', serverArgs: ['acp']
+  // - Goose:      serverCommand: 'goose', serverArgs: ['acp']
+  // - Cline:      serverCommand: 'cline', serverArgs: ['--acp']
   timeout: 60_000,
 });
 
@@ -66,7 +77,9 @@ Use `verifiedPrompt()` when the task produces files — it checks they actually 
 import { createClient, verifiedPrompt } from './src/index.js';
 
 // ⚠️ SECURITY: bypassPermissions skips confirmations. Only use in trusted/sandboxed envs.
-const client = await createClient({ cwd: '/path/to/project', permissionMode: 'bypassPermissions' });
+// NOTE: permissionMode is implemented by passing `--permission-mode` to the server command;
+// this flag is supported by Zed's Claude adapter, but may not exist for other agents.
+const client = await createClient({ cwd: '/path/to/project', serverCommand: 'claude-agent-acp', permissionMode: 'bypassPermissions' });
 const result = await verifiedPrompt(client, 'Translate input.srt to Chinese and save as output.srt', {
   expectedFiles: ['/path/to/project/output.srt'],
   maxRetries: 2,
@@ -79,7 +92,7 @@ await client.close();
 
 ## SECURITY
 
-**`permissionMode` controls what the spawned Claude Code agent can do without asking.**
+**`permissionMode` controls what the spawned agent can do without asking (Zed Claude adapter only; other agents may ignore it).**
 
 - **`bypassPermissions`** skips all confirmation prompts. The agent can read, write, and execute arbitrary commands in the project directory. Only use in sandboxed or fully trusted environments.
 - **`acceptEdits`** auto-allows file writes but still prompts for shell commands. Safer than bypass, but the agent can still overwrite any file in `cwd`.

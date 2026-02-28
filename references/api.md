@@ -21,9 +21,10 @@ Creates and connects a client. Returns `AcpCodeClient`.
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `cwd` | `string` | `process.cwd()` | Project directory Claude works in |
-| `permissionMode` | `string` | `'default'` | Tool approval mode (see below) |
+| `permissionMode` | `string` | `'default'` | Tool approval mode (see below). Implemented via `--permission-mode`; supported by `claude-agent-acp`. May silently fail for other agents. |
 | `permissionHandler` | `function` | auto-allow | Custom approval callback |
-| `serverCommand` | `string` | `'claude-code-acp'` | Path to server binary |
+| `serverCommand` | `string` | `'claude-agent-acp'` | ACP server binary name or path |
+| `serverArgs` | `string[]` | `[]` | Extra args/subcommand to start ACP mode (e.g. `['--experimental-acp']` or `['acp']`). See `references/acp-agents-registry.md`. |
 | `timeout` | `number` | `30000` | Connection timeout (ms) |
 | `mcpServers` | `array` | `[]` | Additional MCP servers |
 
@@ -51,7 +52,7 @@ Creates and connects a client. Returns `AcpCodeClient`.
 | `acceptEdits` | Auto-allow file edits, ask for others |
 | `bypassPermissions` | Auto-allow everything (use with caution) |
 | `plan` | Read-only mode, no edits allowed |
-| `dontAsk` | Deny all permission requests without prompting. The agent cannot execute any tools that require approval. Use for dry-run or audit scenarios where no side effects are desired. *(Behavior inferred from name — verify against claude-code-acp release notes.)* |
+| `dontAsk` | Deny all permission requests silently. The agent cannot execute any tools that require approval. Use for dry-run or audit scenarios where no side effects are desired. |
 
 ## Streaming Events
 

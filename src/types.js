@@ -12,6 +12,7 @@
  * @property {PermissionMode=} permissionMode
  * @property {string=} model
  * @property {string=} serverCommand
+ * @property {string[]=} serverArgs - Extra args/subcommand to start ACP mode (e.g. ['--experimental-acp'] or ['acp']).
  * @property {Record<string,string>=} env
  * @property {number=} timeout
  * @property {number=} maxRetries

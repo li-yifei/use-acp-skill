@@ -3,7 +3,7 @@ import { AcpServer } from './server.js';
 import { AcpSessionClient } from './session.js';
 import { ConnectionTimeoutError } from './errors.js';
 /**
- * High-level client for delegating code tasks to Claude Code via ACP.
+ * High-level client for delegating code tasks to any ACP-compatible agent.
  */
 export class AcpCodeClient {
     server;
@@ -18,6 +18,7 @@ export class AcpCodeClient {
         };
         this.server = new AcpServer({
             command: options.serverCommand,
+            args: options.serverArgs,
             env: options.env,
             permissionMode: options.permissionMode,
         });
